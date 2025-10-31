@@ -1,48 +1,71 @@
 package com.voltageg.springmodbus;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import com.voltageg.modbus.threads.MasterThread;
+import com.voltageg.springmodbus.events.Event;
+import com.voltageg.springmodbus.events.EventRepository;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
-import static java.time.LocalTime.now;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @SpringBootApplication
+@ComponentScan(basePackages = {
+        "com.voltageg.springmodbus",
+        "com.voltageg.modbus.threads"
+})
 public class SpringModBusApplication {
 
-    public static SessionFactory sessionFactory;
-
     public static void main(String[] args) {
-		SpringApplication.run(SpringModBusApplication.class, args);
-        setUp();
-        sessionFactory.inTransaction(session -> {
-            session.persist(new Event("Our very first event!", now()));
-            session.persist(new Event("A follow up event", now()));
-        });
-	}
-
-    protected static void setUp() {
-        // A SessionFactory is set up once for an application!
-        final StandardServiceRegistry registry =
-                new StandardServiceRegistryBuilder()
-                        .build();
-        try {
-            sessionFactory =
-                    new MetadataSources(registry)
-                            .addAnnotatedClass(Event.class)
-                            .buildMetadata()
-                            .buildSessionFactory();
-        }
-        catch (Exception e) {
-            // The registry would be destroyed by the SessionFactory, but we
-            // had trouble building the SessionFactory so destroy it manually.
-            StandardServiceRegistryBuilder.destroy(registry);
-        }
+        SpringApplication.run(SpringModBusApplication.class, args);
     }
 
+//    @Bean
+//    public CommandLineRunner startSlaveThread(SlaveThread slaveThread) {
+//        return args -> {
+//            System.out.println("Starting SlaveThread...");
+//            slaveThread.start();
+//        };
+//    }
+    @Bean
+    public CommandLineRunner startMasterThread(MasterThread masterThread) {
+        return args -> {
+            System.out.println("Starting MasterThread...");
+            masterThread.start();
+        };
+    }
+
+
+    @Bean
+    public CommandLineRunner demo(EventRepository eventRepository) {
+        return (args) -> {
+            // Создаем тестовые данные
+            eventRepository.save(new Event("App Initialised", java.time.LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)));
+            //eventRepository.save(new Event("A follow up event", java.time.LocalDateTime.now()));
+
+            // Выводим в консоль для проверки
+            //eventRepository.findAll().forEach(System.out::println);
+        };
+    }
+
+    @Bean
+    public CommandLineRunner init(EventRepository eventRepository) {
+        return args -> {
+            System.out.println("=== Database Management Commands ===");
+            System.out.println("Database file: ./data/mydatabase.mv.db");
+            System.out.println("Web interface: http://localhost:8080/h2-console");
+            System.out.println("JDBC URL: jdbc:h2:file:./data/mydatabase");
+            System.out.println("Username: sa, Password: (empty)");
+            System.out.println("=== Application Started ===");
+
+            // Создаем начальное событие
+            if (eventRepository.count() == 0) {
+                eventRepository.save(new Event("Application started with file database",
+                        LocalDateTime.now()));
+            }
+        };
+    }
 }
