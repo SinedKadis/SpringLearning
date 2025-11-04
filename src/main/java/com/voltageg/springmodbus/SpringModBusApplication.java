@@ -3,6 +3,7 @@ package com.voltageg.springmodbus;
 import com.voltageg.modbus.threads.MasterThread;
 import com.voltageg.springmodbus.events.Event;
 import com.voltageg.springmodbus.events.EventRepository;
+import com.voltageg.springmodbus.events.Type;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -43,7 +44,7 @@ public class SpringModBusApplication {
     public CommandLineRunner demo(EventRepository eventRepository) {
         return (args) -> {
             // Создаем тестовые данные
-            eventRepository.save(new Event("App Initialised", java.time.LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)));
+            eventRepository.save(new Event("App Initialised", Type.INFO));
             //eventRepository.save(new Event("A follow up event", java.time.LocalDateTime.now()));
 
             // Выводим в консоль для проверки
