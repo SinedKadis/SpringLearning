@@ -23,7 +23,7 @@ public class SensorDataChangedEventListener {
                 event.getHumidity()
         );
 
-        Event dbEvent = new Event(eventMessage, event.getTimeStamp());
+        Event dbEvent = new Event(eventMessage,Type.SENSOR_DATA_UPDATE, event.getTimeStamp());
         eventRepository.save(dbEvent);
 
         System.out.println("Event saved: " + eventMessage);

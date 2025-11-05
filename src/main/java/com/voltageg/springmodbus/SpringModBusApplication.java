@@ -10,9 +10,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-
 @SpringBootApplication
 @ComponentScan(basePackages = {
         "com.voltageg.springmodbus",
@@ -65,7 +62,7 @@ public class SpringModBusApplication {
             // Создаем начальное событие
             if (eventRepository.count() == 0) {
                 eventRepository.save(new Event("Application started with file database",
-                        LocalDateTime.now()));
+                        Type.INFO));
             }
         };
     }
