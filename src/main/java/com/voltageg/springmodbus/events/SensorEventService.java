@@ -14,7 +14,11 @@ public class SensorEventService {
     }
 
     public void publishSensorChange(int temperature, int humidity) {
-        SensorDataChangedEvent event = new SensorDataChangedEvent(this, temperature, humidity);
+        publishSensorChange(temperature, humidity, Type.SENSOR_DATA_UPDATE);
+    }
+
+    public void publishSensorChange(int temperature, int humidity, Type type) {
+        SensorDataChangedEvent event = new SensorDataChangedEvent(this, temperature, humidity,type);
         eventPublisher.publishEvent(event);
     }
 }
